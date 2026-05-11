@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Prescription Module</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Prescription Management</h2>
+
+<input type="hidden" id="prescriptionId">
+
+<input type="number" id="patientId"
+placeholder="Patient ID">
+
+<input type="number" id="doctorId"
+placeholder="Doctor ID">
+
+<input type="text" id="medicines"
+placeholder="Medicines">
+
+<input type="text" id="notes"
+placeholder="Treatment Notes">
+
+<button onclick="savePrescription()">
+Save Prescription
+</button>
+
+<hr>
+
+<h3>Prescription List</h3>
+
+<table border="1" width="100%"
+id="prescriptionTable">
+
+<tr>
+<th>ID</th>
+<th>Patient ID</th>
+<th>Doctor ID</th>
+<th>Medicines</th>
+<th>Notes</th>
+<th>Action</th>
+</tr>
+
+</table>
+
+</div>
+
+<script>
+
+loadPrescriptions();
+
+function savePrescription(){
+
+let prescriptionId =
+document.getElementById("prescriptionId").value;
+
+let prescriptionData = {
+
+patientId:
+document.getElementById("patientId").value,
+
+doctorId:
+document.getElementById("doctorId").value,
+
+medicines:
+document.getElementById("medicines").value,
+
+notes:
+document.getElementById("notes").value
+
+};
+
+if(prescriptionId==""){
+
+fetch("http://localhost:8080/prescriptions",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(prescriptionData)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Prescription Added");
+
+clearForm();
+
+loadPrescriptions();
+
+})
+
+}
+
+else{
+
+fetch(`http://localhost:8080/prescriptions/${prescriptionId}`,{
+
+method:"PUT",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(prescriptionData)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Prescription Updated");
+
+clearForm();
+
+loadPrescriptions();
+
+})
+
+}
+
+}
+
+function loadPrescriptions(){
+
+fetch("http://localhost:8080/prescriptions")
+
+.then(response => response.json())
+
+.then(data => {
+
+let table = `
+<tr>
+<th>ID</th>
+<th>Patient ID</th>
+<th>Doctor ID</th>
+<th>Medicines</th>
+<th>Notes</th>
+<th>Action</th>
+</tr>
+`;
+
+data.forEach(prescription => {
+
+table += `
+<tr>
+
+<td>${prescription.prescriptionId}</td>
+
+<td>${prescription.patientId}</td>
+
+<td>${prescription.doctorId}</td>
+
+<td>${prescription.medicines}</td>
+
+<td>${prescription.notes}</td>
+
+<td>
+
+<button onclick="editPrescription(
+${prescription.prescriptionId},
+${prescription.patientId},
+${prescription.doctorId},
+'${prescription.medicines}',
+'${prescription.notes}'
+)">
+Edit
+</button>
+
+<button onclick="deletePrescription(
+${prescription.prescriptionId}
+)">
+Delete
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+document.getElementById("prescriptionTable").innerHTML = table;
+
+})
+
+}
+
+function deletePrescription(id){
+
+fetch(`http://localhost:8080/prescriptions/${id}`,{
+
+method:"DELETE"
+
+})
+
+.then(response => response.text())
+
+.then(data => {
+
+alert(data);
+
+loadPrescriptions();
+
+})
+
+}
+
+function editPrescription(id,patientId,
+doctorId,medicines,notes){
+
+document.getElementById("prescriptionId").value=id;
+
+document.getElementById("patientId").value=patientId;
+
+document.getElementById("doctorId").value=doctorId;
+
+document.getElementById("medicines").value=medicines;
+
+document.getElementById("notes").value=notes;
+
+}
+
+function clearForm(){
+
+document.getElementById("prescriptionId").value="";
+document.getElementById("patientId").value="";
+document.getElementById("doctorId").value="";
+document.getElementById("medicines").value="";
+document.getElementById("notes").value="";
+
+}
+
+</script>
+
+</body>
+</html>

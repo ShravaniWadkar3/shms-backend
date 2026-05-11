@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Doctor Management</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Doctor Management</h2>
+
+<input type="text"
+id="name"
+placeholder="Doctor Name">
+
+<input type="text"
+id="specialization"
+placeholder="Specialization">
+
+<button onclick="addDoctor()">
+Add Doctor
+</button>
+
+<hr>
+
+<input type="text"
+id="searchText"
+placeholder="Search by Specialization">
+
+<button onclick="searchDoctor()">
+Search
+</button>
+
+<button onclick="loadDoctors()">
+Show All
+</button>
+
+<table border="1"
+width="100%"
+id="doctorTable">
+
+</table>
+
+</div>
+
+<script>
+
+loadDoctors();
+
+
+// ADD DOCTOR
+function addDoctor(){
+
+let doctor = {
+
+name:
+document.getElementById("name").value,
+
+specialization:
+document.getElementById("specialization").value
+
+};
+
+fetch("http://localhost:8080/doctors",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(doctor)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Doctor Added");
+
+loadDoctors();
+
+})
+
+}
+
+
+// LOAD ALL DOCTORS
+function loadDoctors(){
+
+fetch("http://localhost:8080/doctors")
+
+.then(response => response.json())
+
+.then(data => {
+
+showDoctors(data);
+
+})
+
+}
+
+
+// SEARCH DOCTOR
+function searchDoctor(){
+
+let text =
+document.getElementById("searchText").value;
+
+fetch(`http://localhost:8080/doctors/search/${text}`)
+
+.then(response => response.json())
+
+.then(data => {
+
+showDoctors(data);
+
+})
+
+}
+
+
+// SHOW DATA IN TABLE
+function showDoctors(data){
+
+let table = `
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Specialization</th>
+<th>Action</th>
+
+</tr>
+
+`;
+
+data.forEach(doctor => {
+
+table += `
+
+<tr>
+
+<td>${doctor.doctorId}</td>
+
+<td>${doctor.name}</td>
+
+<td>${doctor.specialization}</td>
+
+<td>
+
+<button onclick="deleteDoctor(${doctor.doctorId})">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById("doctorTable")
+.innerHTML = table;
+
+}
+
+
+// DELETE DOCTOR
+function deleteDoctor(id){
+
+fetch(`http://localhost:8080/doctors/${id}`,{
+
+method:"DELETE"
+
+})
+
+.then(response => response.text())
+
+.then(data => {
+
+alert(data);
+
+loadDoctors();
+
+})
+
+}
+
+</script>
+
+</body>
+</html>

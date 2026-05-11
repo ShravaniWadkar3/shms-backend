@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Billing System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Billing Management</h2>
+
+<input type="hidden" id="billId">
+
+<input type="number" id="patientId"
+placeholder="Patient ID">
+
+<input type="number" id="consultationFee"
+placeholder="Consultation Fee">
+
+<input type="number" id="medicineFee"
+placeholder="Medicine Fee">
+
+<select id="paymentStatus">
+
+<option value="Paid">Paid</option>
+
+<option value="Pending">Pending</option>
+
+</select>
+
+<button onclick="saveBill()">
+Generate Bill
+</button>
+
+<hr>
+
+<h3>Billing Records</h3>
+
+<table border="1" width="100%" id="billTable">
+
+<tr>
+<th>ID</th>
+<th>Patient ID</th>
+<th>Consultation</th>
+<th>Medicine</th>
+<th>Total</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+</table>
+
+</div>
+
+<script>
+
+loadBills();
+
+function saveBill(){
+
+let billId =
+document.getElementById("billId").value;
+
+let billData = {
+
+patientId:
+document.getElementById("patientId").value,
+
+consultationFee:
+document.getElementById("consultationFee").value,
+
+medicineFee:
+document.getElementById("medicineFee").value,
+
+paymentStatus:
+document.getElementById("paymentStatus").value
+
+};
+
+if(billId==""){
+
+fetch("http://localhost:8080/billing",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(billData)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Bill Generated");
+
+clearForm();
+
+loadBills();
+
+})
+
+}
+
+else{
+
+fetch(`http://localhost:8080/billing/${billId}`,{
+
+method:"PUT",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(billData)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Bill Updated");
+
+clearForm();
+
+loadBills();
+
+})
+
+}
+
+}
+
+function loadBills(){
+
+fetch("http://localhost:8080/billing")
+
+.then(response => response.json())
+
+.then(data => {
+
+let table = `
+<tr>
+<th>ID</th>
+<th>Patient ID</th>
+<th>Consultation</th>
+<th>Medicine</th>
+<th>Total</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+`;
+
+data.forEach(bill => {
+
+table += `
+<tr>
+
+<td>${bill.billId}</td>
+
+<td>${bill.patientId}</td>
+
+<td>${bill.consultationFee}</td>
+
+<td>${bill.medicineFee}</td>
+
+<td>${bill.totalAmount}</td>
+
+<td>${bill.paymentStatus}</td>
+
+<td>
+
+<button onclick="editBill(
+${bill.billId},
+${bill.patientId},
+${bill.consultationFee},
+${bill.medicineFee},
+'${bill.paymentStatus}'
+)">
+Edit
+</button>
+
+<button onclick="deleteBill(
+${bill.billId}
+)">
+Delete
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+document.getElementById("billTable").innerHTML = table;
+
+})
+
+}
+
+function deleteBill(id){
+
+fetch(`http://localhost:8080/billing/${id}`,{
+
+method:"DELETE"
+
+})
+
+.then(response => response.text())
+
+.then(data => {
+
+alert(data);
+
+loadBills();
+
+})
+
+}
+
+function editBill(id,patientId,
+consultationFee,medicineFee,paymentStatus){
+
+document.getElementById("billId").value=id;
+
+document.getElementById("patientId").value=patientId;
+
+document.getElementById("consultationFee").value=
+consultationFee;
+
+document.getElementById("medicineFee").value=
+medicineFee;
+
+document.getElementById("paymentStatus").value=
+paymentStatus;
+
+}
+
+function clearForm(){
+
+document.getElementById("billId").value="";
+document.getElementById("patientId").value="";
+document.getElementById("consultationFee").value="";
+document.getElementById("medicineFee").value="";
+
+}
+
+</script>
+
+</body>
+</html>

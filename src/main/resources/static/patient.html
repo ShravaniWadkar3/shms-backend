@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Patient Management</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Patient Management</h2>
+
+<input type="text"
+id="name"
+placeholder="Enter Patient Name">
+
+<input type="number"
+id="age"
+placeholder="Enter Age">
+
+<input type="text"
+id="gender"
+placeholder="Enter Gender">
+
+<input type="text"
+id="phone"
+placeholder="Enter Phone">
+
+<button onclick="addPatient()">
+
+Add Patient
+
+</button>
+
+<br><br>
+
+<table border="1" width="100%">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Age</th>
+<th>Gender</th>
+<th>Phone</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="patientTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+function addPatient(){
+
+let patient = {
+
+name:
+document.getElementById("name").value,
+
+age:
+document.getElementById("age").value,
+
+gender:
+document.getElementById("gender").value,
+
+phone:
+document.getElementById("phone").value
+
+};
+
+fetch("http://localhost:8080/patients",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(patient)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Patient Added Successfully");
+
+loadPatients();
+
+})
+
+}
+
+function loadPatients(){
+
+fetch("http://localhost:8080/patients")
+
+.then(response => response.json())
+
+.then(data => {
+
+let table = "";
+
+data.forEach(patient => {
+
+table += `
+
+<tr>
+
+<td>${patient.patientId}</td>
+
+<td>${patient.name}</td>
+
+<td>${patient.age}</td>
+
+<td>${patient.gender}</td>
+
+<td>${patient.phone}</td>
+
+<td>
+
+<button onclick="deletePatient(${patient.patientId})">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById("patientTable")
+.innerHTML = table;
+
+})
+
+}
+
+function deletePatient(id){
+
+fetch(`http://localhost:8080/patients/${id}`,{
+
+method:"DELETE"
+
+})
+
+.then(response => response.text())
+
+.then(data => {
+
+alert(data);
+
+loadPatients();
+
+})
+
+}
+
+loadPatients();
+
+</script>
+
+</body>
+</html>

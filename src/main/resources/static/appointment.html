@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Appointment Management</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Appointment Management</h2>
+
+<input type="number"
+id="patientId"
+placeholder="Patient ID">
+
+<input type="number"
+id="doctorId"
+placeholder="Doctor ID">
+
+<input type="datetime-local"
+id="appointmentDate">
+
+<button onclick="addAppointment()">
+Add Appointment
+</button>
+
+<table border="1"
+width="100%"
+id="appointmentTable">
+
+</table>
+
+</div>
+
+<script>
+
+function addAppointment(){
+
+let appointment = {
+
+patient:{
+patientId:
+document.getElementById("patientId").value
+},
+
+doctor:{
+doctorId:
+document.getElementById("doctorId").value
+},
+
+appointmentDate:
+document.getElementById("appointmentDate").value
+
+};
+
+fetch("http://localhost:8080/appointments",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(appointment)
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+alert("Appointment Added");
+
+loadAppointments();
+
+})
+
+}
+
+function loadAppointments(){
+
+fetch("http://localhost:8080/appointments")
+
+.then(response => response.json())
+
+.then(data => {
+
+let table = `
+
+<tr>
+
+<th>ID</th>
+<th>Patient ID</th>
+<th>Doctor ID</th>
+<th>Date</th>
+
+</tr>
+
+`;
+
+data.forEach(a => {
+
+table += `
+
+<tr>
+
+<td>${a.appointmentId}</td>
+
+<td>${a.patient.patientId}</td>
+
+<td>${a.doctor.doctorId}</td>
+
+<td>${a.appointmentDate}</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById("appointmentTable")
+.innerHTML = table;
+
+})
+
+}
+
+loadAppointments();
+
+</script>
+
+</body>
+
+</html>
